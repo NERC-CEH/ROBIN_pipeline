@@ -1,0 +1,599 @@
+---
+title: "Data Processing Example"
+author: "ROBIN Network"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: 
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+packagesNeeded <- c("lfstat", "lmomco", "lubridate", "tidyverse", "circular",
+                    "trend", "strucchange", "changepoint", "Kendall", "zyp",
+                    "modifiedmk", "boot", "RODBC")
+for(p in packagesNeeded){
+  if(!(p %in% installed.packages()[,1])){
+    install.packages(p)
+  }
+  library(p, character.only = T)
+}
+source("main_functions.R")
+```
+
+# Plan
+
+This R Markdown document is part of the ROBIN hydrometric data pipeline. It takes daily and sub-daily data, extracting statistics of high, low and mean flows, including estimates of trend and aridity indices.
+
+The present script only runs the work for a single station.
+
+Currently, this script uses the quarters of the year to delineate seasons, and the hydrological year is naively assumed to be January to December, to ensure consistency across the ROBIN dataset.
+
+## Outline of script
+
+-   Data format (columns: Agency, Station, Day, Flow, Flag)
+-   Check for Level-1/Level-2 status based on completeness.
+-   Summary statistics
+    -   Monthly thresholds
+    -   POT series
+    -   30-day/10-day/7-day rolling totals
+    -   Annual/monthly/quarterly quantiles/mean
+    -   Annual 1-day/10-day/30-day maxima
+    -   Annual 7-day/30-day minima
+    -   Mean Annual Flow (Standardised)
+-   Tests
+    -   Pettitt breakpoint test
+    -   meanvar breakpoint test
+    -   Chow breakpoint test
+    -   Block-bootstrapped Mann-Kendall
+    -   Theil-Sen estimation of slope
+-   Visualisation
+    -   Clustering of POT and drought events
+    -   Trends and clustering of event timings (day of year)
+
+# Read in data
+
+First the data must be read in, hopefully in the pre-specified format. The only addition required is the addition of any other flags to the `Flag` field. Currently there are:
+
+-   M: Missing value. Should correspond to an `NA`, `0`, or empty value `""` in the Value column.
+-   E: Estimated (or modelled) value
+-   S: Suspect value, may have high associated error.
+
+Dates should be consistent, either with a full date (e.g. `2022-04-01`), or a full date and time (e.g. `2022-04-01T09:00:00Z`)
+
+```{r key_arguments}
+# This is the main chunk that needs editing in order to run this markdown
+# document.
+
+filein_path <- "./41022_gdf.csv" #location of the gauged daily flow file.
+date_format <- "date" # state "date" or "datetime"
+
+data_in <- read_in_robin(filein_path, skip=21)
+
+Agency <- "EA"
+Station <- 41022
+
+data_in$Agency <- Agency
+data_in$Station <- Station
+
+MIN_DAYS_PER_YEAR <- 300 # Need to agree on.
+```
+
+## Check data type
+
+All the data should be gauged daily flow. The ``check_for_level`` function assesses whether the data is suitable for level 1 or level 2 analysis.
+
+```{r checkforlevel}
+check_for_level(data_in, "M")
+```
+
+# Reformat data
+
+Dates are reformatted into a datetime variable, and a numerical record ordering is added. QA flags are converted to a factor form. Data without issue should have empty `QA_Flag` fields. 
+
+```{r data_in}
+data_in$id <- seq(1, nrow(data_in)) # does not account for missing rows in the data
+data_in$Flag <- factor(data_in$Flag)
+
+# Make the lfstat object
+lf_flow_raw <- data_in
+colnames(lf_flow_raw)[1] <- "Date"
+lf_flow_raw$day <- day(lf_flow_raw$Date)
+lf_flow_raw$month <- month(lf_flow_raw$Date)
+lf_flow_raw$year <- year(lf_flow_raw$Date)
+lf_flow <- lf_flow_raw[,c("day", "month", "year", "Flow")]
+colnames(lf_flow) <- c("day", "month", "year", "flow")
+year_start_month <- 1
+lf_flow <- lfstat::createlfobj(lf_flow, hyearstart=year_start_month)
+flowunit(lf_flow) <- "m^3/sec"
+lf_flow$date <- lf_flow_raw$Date
+```
+
+# Derive flow statistics
+
+## High Flow
+
+### Annual Maxima
+Currently, annual maxima series are extracted from years for which at least 300 days of data have been observed. 
+```{r annual_maxima}
+
+# This value might be different by indicator
+amax_raw <- as.data.frame(lf_flow) %>%
+  group_by(year) %>%
+  summarise(count=n(), amax=max(flow, na.rm=T),
+            doy=which.max(flow), date=date[doy]) %>% 
+  dplyr::filter(count > MIN_DAYS_PER_YEAR)
+
+amax_out <- amax_raw[,c(1,3,5,4)]
+colnames(amax_out) <- c("YEAR", "AMAX", "DATE", "DOY")
+
+#save annual maxima to .csv file.
+write_csv(amax_raw, paste0("./Data/AM_raw_", Station, "_", Agency, ".csv"))
+```
+
+```{r annual_maxima_plot, echo=FALSE}
+plot(amax_raw$year, amax_raw$amax, type='s', col=2, log='y',
+     xlab="Year", ylab="AMAX (m³/s)")
+```
+
+### Peaks-over-Threshold
+
+Here a monthly threshold is determined by taking the POT3 threshold (an average of 3 POT events per year) which equated to an annual probability of exceedence of 0.81%.
+```{r POT_derivation_and_analysis}
+vmt_pot <- lfstat::vary_threshold(lf_flow,
+                      varying="monthly",
+                      fun=function(x){quantile(x, probs=c(0.992), na.rm=T)})
+
+lf_flow$threshold <- as.vector(vmt_pot)
+
+# Thresholds are computed monthly using the lfstat vary_threshold function
+vmt_summary <- lf_flow %>% 
+  dplyr::group_by(month) %>% 
+  dplyr::summarise(threshold=mean(threshold))
+
+lf_flowPOT <- lf_flow
+lf_flowPOT$flow[is.na(lf_flowPOT$flow)] <- -9999
+peaks <- ilaprosUtils::extractPeaks(vecObs=lf_flowPOT$flow, mintimeDiff=7)
+pot_raw <- lf_flow[((lf_flow$flow > lf_flow$threshold) & (peaks==1)), ]
+readr::write_csv(pot_raw, paste0("./Data/POT_raw_", Station , "_", Agency, ".csv"))
+```
+
+Here we plot the POTs for the whole time series, and a zoomed-in version which more clearly shows the high flow thresholds.
+
+```{r POT_plot, echo=F}
+par(mgp=c(2,1,0), mar=c(3,3,1,1))
+plot(lf_flow_raw$Date, lf_flow_raw$Flow,
+     col="grey80", type='l', xlab="Date", ylab="Flow (m\U00B3/s)")
+points(pot_raw$date, pot_raw$flow, col=2)
+lines(lf_flow$date, lf_flow$threshold, col="powderblue", lty=2)
+
+par(mgp=c(2,1,0), mar=c(3,3,1,1))
+plot(lf_flow_raw$Date, lf_flow_raw$Flow,
+     col="grey80", type='l', xlab="Date (2000)", ylab="Flow (m\U00B3/s)", xlim=as.POSIXct(c("2000-01-01","2000-12-31")))
+points(pot_raw$date, pot_raw$flow, col=2)
+lines(lf_flow$date, lf_flow$threshold, col="powderblue", lty=2)
+```
+
+## Low flow
+
+### Percentiles of flow
+
+We calculate the annual and seasonal maximum and minimum, and the 5th, 70th, 90th, and 95th percentiles of flow. Seasons are actually just yearly quarters (JFM, AMJ, JAS, OND) to allow for seasonal comparability across the network.
+
+```{r percentiles}
+lf_xts <- as.xts(lf_flow)
+percentiles <- list(max=1, Q95=0.05, Q90=0.10, Med=0.5, Q70=0.30, Q05=0.95, min=0)
+
+## Yearly analysis of percentiles of flow
+lf_year <- lapply(percentiles, \(x){yearly_summary(lf_xts, x)})
+lf_year_long <- as.data.frame(do.call(rbind,lf_year))
+lf_year <- lf_year_long %>% 
+  tidyr::pivot_wider(
+    id_cols=c(year),
+    names_from=Qxx,
+    names_prefix="Q",
+    values_from="discharge") ## pivot_longer puts data in a form easier to plot using ggplot
+colnames(lf_year) <- 
+  c("Year", "MAX", "Q95", "Q90", "Q70", "Median", "Q05", "MIN")
+write_csv(lf_year, paste0("./Data/yearlyPercentiles_", 
+                          Station, "_", Agency, ".csv"))
+
+
+lf_year_long$Qxx <- factor(lf_year_long$Qxx, levels=c(0,0.05,0.5,0.7,0.9,0.95,1),
+                           labels=c("MAX","Q05", "Med", "Q70", "Q90", "Q95", "MIN"))
+
+## Seasonal analysis of percentiles of flow
+lf_seasonal <- lapply(percentiles, \(x){quarterly_summary(lf_xts, x)})
+lf_seasonal_long <- as.data.frame(do.call(rbind,lf_seasonal))
+lf_seasonal <- lf_seasonal_long %>% 
+  tidyr::pivot_wider(
+    id_cols=c(year, Season),
+    names_from=Qxx,
+    names_prefix="Q",
+    values_from="Flow")
+colnames(lf_seasonal) <- 
+  c("Year", "Season", "MAX", "Q95", "Q90", "Q70", "Median", "Q05", "MIN")
+readr::write_csv(lf_seasonal, paste0("./Data/seasonalPercentiles_", 
+                          Station, "_", Agency, ".csv"))
+
+
+## Monthly analysis of percentiles of flow
+lf_monthly <- lapply(percentiles, \(x){monthly_summary(lf_xts, x)})
+lf_monthly_long <- as.data.frame(do.call(rbind,lf_monthly))
+lf_monthly <- lf_monthly_long %>% 
+  tidyr::pivot_wider(id_cols=c(year, month), names_from=Qxx, names_prefix="Q",
+              values_from="discharge")
+colnames(lf_monthly) <- 
+  c("Year", "Month", "MAX", "Q95", "Q90", "Q70", "Median", "Q05", "MIN")
+readr::write_csv(lf_monthly, paste0("./Data/monthlyPercentiles_", 
+                          Station, "_", Agency, ".csv"))
+```
+
+As an example, we plot the yearly percentiles of flow for this example station.
+
+```{r, yearly_mean_plot, echo=F}
+ggplot(lf_year_long, aes(x=year, y=discharge)) + 
+  geom_line(aes(color=Qxx)) +
+  scale_y_log10() +
+  theme_bw() + 
+  labs(x="Year", y="Flow")
+```
+
+### Drought events
+
+Using the ``lfstat`` package, we calculate the monthly varying 20% threshold, and use that to find periods of drought where this threshold is not exceeded for a length of time.
+
+```{r drought_identification}
+vmt_drought <- lfstat::vary_threshold(lf_flow,
+                      varying="monthly",
+                      fun=function(x){quantile(x, probs=c(0.2))})
+droughts <- lfstat::find_droughts(lf_flow, vmt_drought, varying="monthly")
+readr::write_csv(summary(droughts),
+          file=paste0("./Data/droughts_", Station, "_", Agency, ".csv"))
+```
+
+### N-day minima
+We also calculate the mean annual flow minima based on 7 and 30 day accumulations.
+
+```{r mam}
+mean_annual_min_7 <- lfstat::MAM(lf_flow, 7, yearly=TRUE)
+mean_annual_min_30 <- lfstat::MAM(lf_flow, 30, yearly=TRUE)
+mean_flow <- lfstat::meanflow(lf_flow, yearly=TRUE)
+
+## Summary table
+mean_lowflow <- data.frame(Year=min(lf_flow$year):max(lf_flow$year),
+                           MAM7=mean_annual_min_7$MAn,
+                           MAM30=mean_annual_min_30$MAn,
+                           MAF=mean_flow$flow)
+
+readr::write_csv(mean_lowflow,
+          paste0("./Data/mean_lowflow_", Station, "_", Agency, ".csv"))
+```
+
+# Trend analysis and plots
+
+We test the yearly quantile data for significant breakpoints (examining daily data gives very high likelihood of breakpoints being detected due to very narrow confidence bands conferred by large datasets.)
+
+## Check for breakpoints
+
+```{r, trend_tests, echo=F}
+# This section is just to rearrange the tables into the right format for 
+# trend and breakpoint tests.
+colnames(mean_annual_min_30) <- c("year", "MAn_30")
+colnames(mean_annual_min_7) <- c("year", "MAn_7")
+lf_year_temp <- lf_year
+colnames(lf_year_temp)[1] <- "year"
+
+# lf_data combines the AMAX time series, the yearly quantiles of flow, and the 
+# mean annual minima series into a single table.
+lf_data <- plyr::join_all(
+  dfs=list(lf_year_temp,
+           amax_raw[,c(1,3)],
+           mean_annual_min_30,
+           mean_annual_min_7),
+  type='full', by="year")
+
+pettitt_tc <- function(x){
+  # This function is just a wrapper for the pettitt.test function to catch errors safely
+  tryCatch(trend::pettitt.test(x),
+           error=\(e)list(estimate=1, p.value=1),
+           warning=\(e)list(estimate=1, p.value=1))
+}
+
+pttest0 <- apply(lf_data[,-1], 2, pettitt_tc)
+pttest_table <- as.data.frame(t(sapply(pttest0,
+                \(x){c(lf_year$Year[floor(x$estimate)[1]], x$p.value)})))
+colnames(pttest_table) <- c("Possible_breakpoint_1", "pvalue")
+
+chowtest <- lapply(colnames(lf_data)[-1], 
+      \(x){strucchange::sctest(as.formula(paste0(x, "~year")),data=lf_data, type="Chow")})
+
+chowtest_table <- as.data.frame(t(sapply(chowtest,
+                    \(x){c("Fscore"=x$statistic, "p-value"=x$p.value)})))
+colnames(chowtest_table) <- c("F_score", "p_value")
+
+meanvar_tc <- function(x){
+  tryCatch(changepoint::cpt.meanvar(x, minseglen=5, test.stat="Gamma")@ncpts.max,
+           error=\(e)NA,
+           warning=\(e)NA)
+}
+
+meanvar_table <- sapply(lf_data[,-1], meanvar_tc)
+
+changepoint_table <- data.frame(
+  "Pettitt bp 1"= pttest_table$Possible_breakpoint_1,
+  "Pettitt p"= pttest_table$pvalue,
+  "Chow test F" = chowtest_table$F_score,
+  "Chow test p" = chowtest_table$p_value,
+  "CPT max bp" = meanvar_table
+)
+knitr::kable(changepoint_table, units=4, digits=3)
+```
+
+## Check for autocorrelation
+We plot the autocorrelation of the different percentiles of flow, AMAX and POT data.
+
+```{r autocorrelation_analysis}
+# acf is a base auto-correlation function in the R stats package.
+daily_autocor <- acf(lf_flow$flow, ci.type="ma", plot=F)
+amax_autocor <- acf(amax_raw$amax, ci.type="ma", plot=F)
+pot_autocor <- acf(pot_raw$flow, ci.type="ma", plot=F)
+low_ac_monthly <- lf_monthly_long %>%
+  dplyr::filter(Qxx==0.95 & !is.na(discharge)) %>%
+  dplyr::select(discharge) %>%
+  acf(ci.type="ma", plot=F)
+low_ac_q1 <- lf_seasonal_long %>% 
+  dplyr::filter(Qxx==0.95 & Season=="Qu1" & !is.na(Flow)) %>%
+  dplyr::select(Flow) %>%
+  acf(ci.type="ma", plot=F)
+low_ac_Jan <-  lf_monthly_long %>%
+  dplyr::filter(Qxx==0.95 & month==1 & !is.na(discharge)) %>%
+  dplyr::select(discharge) %>%
+  acf(ci.type="ma", plot=F)
+```
+
+```{r autocorrelation_plots, echo=F}
+par(mfrow=c(3,2), mar=c(3,3,1.5,1), mgp=c(2,1,0))
+plot(daily_autocor, main=""); title("Daily flow", line=0.5)
+plot(amax_autocor, main=""); title("AMAX flow", line=0.5)
+plot(pot_autocor, main=""); title("POT flow", line=0.5)
+plot(low_ac_monthly, main=""); title("Monthly Low Flow", line=0.5)
+plot(low_ac_q1, main=""); title("JFM low flow", line=0.5)
+plot(low_ac_Jan, main=""); title("Jan low flow", line=0.5)
+```
+
+## Mann-Kendall Tests
+
+We perform Mann-Kendall tests, using significance derived from block-bootstrapping, using a block length of four years.
+
+```{r MannKendall_testing, warning=FALSE}
+# MKZ_blockboot is a custom function which applies block bootstrapping to 
+# undertake a significance test on the Mann Kendall statistic.
+
+# lf_data combines the AMAX time series, the yearly quantiles of flow, and the 
+# mean annual minima series into a single table.
+mk_yearly <- lapply(lf_data[,-1], MKZ_blockboot, bootl=4)
+
+mk_yearly <- as.data.frame(do.call(rbind, mk_yearly))
+
+mk_yearly$pwmkZ <- NA
+mk_yearly$pwmkP <- NA
+mk_yearly$pwmkTSE <- NA
+
+for(i in 1:ncol(lf_data[,-1])){
+  z <- pwmk(lf_data[,i])
+  mk_yearly$pwmkZ[i] <- z[1]
+  mk_yearly$pwmkP[i] <- z[4]
+  mk_yearly$pwmkTSE[i] <- z[2]
+}
+
+```
+
+```{r MannKendall_summary, echo=F}
+colnames(mk_yearly) <- c("MKZ", "MKZ 2.5%ile", "MKZ 97.5%ile",
+                         "MKZ significant", "prewhitened MKZ", 
+                         "prewhitened MKZ pvalue", "prewhitened TSE")
+knitr::kable(mk_yearly, digits=3)
+
+
+
+readr::write_csv(as.data.frame(cbind(mk_yearly, changepoint_table)),
+          paste0("./Data/MK_changepoint_tests_", Station, "_", Agency, ".csv"))
+```
+
+## Theil-Sen slope
+
+The Theil-Sen slope is a robust approach to estimating the average slope of a time series, and which is commonly used in hydrology. Here we apply Theil-Sen to the same data that was tested under Mann-Kendall.
+
+```{r tse_estimation}
+# Trends in high/mid/low percentiles and AMAX
+
+lf_data <- plyr::join_all(dfs=list(lf_year_temp, amax_raw[,c(1,3)],
+                                   mean_annual_min_30, mean_annual_min_7),
+                          type='full', by="year")
+
+MKp <- t(apply(lf_data[,-1], 2 , \(x)unlist(Kendall::MannKendall(x))[1:2]))
+TSEp <- t(sapply(colnames(lf_data)[-1],\(x){
+  zyp::zyp.sen(as.formula(paste0(x,"~year")), data=lf_data)$coefficients}))
+```
+
+```{r summmary_of_trends, echo=F}
+trend_table <- data.frame(
+  quantile = rownames(MKp),
+  MKZ = MKp[,1],
+  MK_pvalue = MKp[,2],
+  TSE = TSEp[,2],
+  TSE_intercept = TSEp[,1]
+)
+knitr::kable(trend_table, digits=3)
+```
+
+## Temporal clustering
+
+### Droughts
+
+Here we examine whether there are any significant clusters or prolonged absences of drought events, only looking at start dates.
+
+```{r, drouught_clustering, message=FALSE}
+summdrought <- summary(droughts)
+# findHydrolYr is a custom function to work out which hydrological year an event is in
+drght_per_yr <- findHydrolYr(lubridate::ymd(summdrought$time), starttime="2000-01-01") %>%
+  dplyr::group_by(yr) %>% 
+  dplyr::summarise(Nlow=n())
+
+print(Kendall::MannKendall(drght_per_yr$Nlow))
+print(var(drght_per_yr$Nlow)/mean(drght_per_yr$Nlow))
+
+lf_year <- dplyr::left_join(lf_year, drght_per_yr, by=c("Year"="yr"))
+
+## denclust is a custom function to perform kernel density estimation as in Merz et al 2013.
+DC <- denclust(summdrought$time,
+               bwi=365*4, # currently a bandwidth of 4 years is used to focus on medium-to-long droughts
+    plotfilename=paste0("./droughtclustering_", Station,"_", Agency, ".png"))
+```
+
+Here we see that the dispersion of droughts is `r var(drght_per_yr$Nlow)/mean(drght_per_yr$Nlow)`. If this is a lot less than 1, then it shows signs of under dispersion compared to a Poisson process (independent arrivals).
+
+### POT events
+
+#### clustering: over/underdispersion
+
+Here we examine whether there are any significant clusters or prolonged absences of POT events.
+
+```{r POT_clustering, message=FALSE}
+pot_per_year <- pot_raw %>% dplyr::group_by(year) %>% dplyr::summarise(Npots=n())
+Kendall::MannKendall(pot_per_year$Npots)
+var(pot_per_year$Npots)/mean(pot_per_year$Npots)
+
+
+lf_year <- dplyr::left_join(lf_year, pot_per_year, by=c("Year"="year"))
+
+DC_pot <- denclust(pot_raw$date, bwi=365*2, daysNotSeconds=FALSE,
+    plotfilename=paste0("./droughtclustering_", Station,"_", Agency, ".png"))
+```
+
+Here we see that the dispersion of POTs is `r var(pot_per_year$Npots)/mean(pot_per_year$Npots)`. If this is a lot less than 1, then it shows signs of under dispersion compared to a Poisson process (independent arrivals).
+
+## Trends in timing
+
+We use circular statistics to see whether annual minima, maxima and POTs are strongly linked to the time of year, and a rolling mean in the time of year of these events to assess if there is a trend in the timing of events. 
+
+### 7-day minima/droughts
+
+In this section we briefly look at whether there are trends in when in the year droughts and 7-day minima are happening.
+
+```{r circular_drought}
+# day of year of droughts object
+drt_yday <- ((lubridate::yday(summdrought$time) + 180) %% 365) - 180
+drght_circular <- circular::circular(lubridate::yday(summdrought$time) * 2*pi/365)
+
+# circular and rolling window means for patterns in event timing
+rm_circ <- zoo::rollapply(drght_circular, 
+               FUN=\(x){suppressWarnings(circular::mean.circular(x))}, width=50)
+rm_circ2 <- zoo::rollmean(lubridate::yday(summdrought$time), 50)
+```
+
+```{r circular_drought_plots, echo=FALSE}
+plot(density(drt_yday, from=-180, to=365-180, adjust=0.5), xaxt='n',
+     main="Density of drought timings", xlab="Date")
+axis(1, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+plot(summdrought$time[25:(length(drght_circular)-25)], rm_circ2,
+     ylab="Day of year",xlab="Date", yaxt='n',
+     main="Rolling mean of drought dates (50 event)", type='l', ylim=c(90,270))
+axis(2, at=seq(0,365,length.out=13),
+    labels=c("J","F","M","A","M","J","J","A","S","O","N","D","J"))
+
+
+plot(density(drght_circular, bw=10), plot.type="line",
+     ylim=c(0,0.2), xaxt='n', main="Circular density of drought timings")
+axis(1, at=0:12/2,
+     labels=c("J","F","M","A","M","J","J","A","S","O","N","D","J"))
+plot(summdrought$time[25:(length(drght_circular)-25)],
+     (((rm_circ*365)/(2*pi))+180) %% 365 - 180,
+     ylab="Day of year",xlab="Date", yaxt='n',
+     main="Rolling circular mean of drought timings (50-event)", type='l')
+axis(2, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+```
+
+### AMAX/POT
+
+In this section we briefly look at whether there are trends in when in the year AMAX events and other POT events are happening.
+
+```{r POT_circular}
+# day of year of POTs
+fhy_pot <- (lubridate::yday(pot_raw$date)+180)%%365 - 180
+pot_circular <- circular::circular(fhy_pot*2*pi/365)
+# circular mean date
+rm_pot <- zoo::rollapply(pot_circular, 
+              FUN=\(x){suppressWarnings(circular::mean.circular(x))}, width=50)
+rm_pot2 <- zoo::rollmean(fhy_pot, 50)
+
+# day of year of annual maxima
+fhy_am <- (lubridate::yday(amax_raw$date)+180)%%365 - 180
+am_circular <- circular::circular(fhy_am*2*pi/365)
+
+# circular mean date
+rm_am <- zoo::rollapply(am_circular, 
+              FUN=\(x){suppressWarnings(circular::mean.circular(x))}, width=10)
+rm_am2 <- zoo::rollmean(fhy_am, 10)
+```
+
+```{r POT_circular_plots, echo=FALSE, results="hide"}
+plot(density(fhy_pot, adjust=0.5, from=-180, to=365-180), xaxt='n',
+     main="Density plot of POT event timings", xlab="Date")
+axis(1, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+
+plot(pot_raw$date[25:(length(fhy_pot)-25)], 
+     (((rm_pot*365)/(2*pi))+180) %% 365 - 180,
+     ylab="Day of year", xlab="Date", yaxt='n', type='l',
+     main="Rolling mean POT DOY (50 event)")
+axis(2, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+
+
+plot(circular::density.circular(pot_circular, bw=10), plot.type='line',
+     ylim=c(0,0.2), xaxt='n', main="Circular density of POT event timings",
+     xlab="Date")
+axis(1, at=0:12/2, 
+     labels=c("J","F","M","A","M","J","J","A","S","O","N","D","J"))
+plot(pot_raw$date[25:(length(fhy_pot)-25)],
+     rm_pot2, ylab="Day of year", xlab="Date", yaxt='n', ylim=c(-40,40),
+     type='l', main="Rolling circular mean DOY (50-event)")
+axis(2, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+
+plot(density(fhy_am, adjust=0.5, from=-180, to=365-180), xaxt='n',
+     main="Density plot of am event timings", xlab="Date")
+axis(1, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+
+plot(amax_raw$date[5:(length(fhy_am)-5)], 
+     (((rm_am*365)/(2*pi)) + 180) %% 365 - 180,
+     ylab="Day of year", xlab="Date", yaxt='n', type='l',
+     main="Rolling mean am DOY (50 event)")
+axis(2, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+
+
+plot(circular::density.circular(am_circular, bw=10), plot.type='line',
+     ylim=c(0,0.2), xaxt='n', main="Circular density of am event timings",
+     xlab="Date")
+axis(1, at=0:12/2, 
+     labels=c("J","F","M","A","M","J","J","A","S","O","N","D","J"))
+plot(amax_raw$date[5:(length(fhy_am)-5)],
+     rm_am2, ylab="Day of year", xlab="Date", yaxt='n', ylim=c(-40,40),
+     type='l', main="Rolling circular mean DOY (50-event)")
+axis(2, at=seq(-180,365-180,length.out=13),
+     labels=c("J","A","S","O","N","D","J","F","M","A","M","J","J"))
+```
+
+```{r, echo=F}
+lf_year <- dplyr::left_join(lf_year, pot_per_year, by=c("Year"="year"))
+
+readr::write_csv(lf_year,
+          file=paste0("./Data/yearlystats_", Station,"_", Agency, ".csv"))
+```

@@ -1,0 +1,778 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Data Processing Example},
+  pdfauthor={ROBIN Network},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Data Processing Example}
+\author{ROBIN Network}
+\date{2023-03-21}
+
+\begin{document}
+\maketitle
+
+\hypertarget{plan}{%
+\section{Plan}\label{plan}}
+
+This R Markdown document is part of the ROBIN hydrometric data pipeline.
+It takes daily and sub-daily data, extracting statistics of high, low
+and mean flows, including estimates of trend and aridity indices.
+
+The present script only runs the work for a single station.
+
+\hypertarget{outline-of-script}{%
+\subsection{Outline of script}\label{outline-of-script}}
+
+\begin{itemize}
+\tightlist
+\item
+  Data format (columns: Agency, Station, Day, Flow, Flag)
+\item
+  Check for Level-1/Level-2 status based on completeness.
+\item
+  Summary statistics
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Monthly thresholds
+  \item
+    POT series
+  \item
+    30-day/10-day/7-day rolling totals
+  \item
+    Annual/monthly/quarterly quantiles/mean
+  \item
+    Annual 1-day/10-day/30-day maxima
+  \item
+    Annual 7-day/30-day minima
+  \end{itemize}
+\item
+  Tests
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Pettitt breakpoint test
+  \item
+    Seasonal Mann-Kendall
+  \item
+    Rolling Mann-Kendall-Snyers Indicators
+  \end{itemize}
+\item
+  SSI
+\item
+  Intermittence
+\item
+  Mean Annual Flow (Standardised)
+\item
+  Aridity Index
+\end{itemize}
+
+\hypertarget{read-in-data}{%
+\section{Read in data}\label{read-in-data}}
+
+First the data must be read in, hopefully in the pre-specified format.
+The only addition required is the addition of any other flags to the
+\texttt{Flag} field. Currently there are:
+
+\begin{itemize}
+\tightlist
+\item
+  M: Missing value. Should correspond to an \texttt{NA}, \texttt{0}, or
+  empty value \texttt{""} in the Value column.
+\item
+  E: Estimated (or modelled) value
+\item
+  S: Suspect value, may have high associated error.
+\end{itemize}
+
+Dates should be consistent, either with a full date
+(e.g.~\texttt{2022-04-01}), or a full date and time
+(e.g.~\texttt{2022-04-01T09:00:00Z})
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{filein\_path }\OtherTok{\textless{}{-}} \StringTok{"./41022\_gdf.csv"}
+\NormalTok{date\_format }\OtherTok{\textless{}{-}} \StringTok{"date"} \CommentTok{\# state "date" or "datetime"}
+
+\NormalTok{data\_in }\OtherTok{\textless{}{-}} \FunctionTok{read\_in\_robin}\NormalTok{(filein\_path, }\AttributeTok{skip=}\DecValTok{21}\NormalTok{)}
+
+\NormalTok{Agency }\OtherTok{\textless{}{-}} \StringTok{"EA"}
+\NormalTok{Station }\OtherTok{\textless{}{-}} \DecValTok{41022}
+
+\NormalTok{data\_in}\SpecialCharTok{$}\NormalTok{Agency }\OtherTok{\textless{}{-}}\NormalTok{ Agency}
+\NormalTok{data\_in}\SpecialCharTok{$}\NormalTok{Station }\OtherTok{\textless{}{-}}\NormalTok{ Station}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{check-data-type}{%
+\subsection{Check data type}\label{check-data-type}}
+
+All the data should be gauged daily flow.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{check\_for\_level}\NormalTok{(data\_in, }\StringTok{"M"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Suitable for trend analysis"
+\end{verbatim}
+
+\begin{verbatim}
+## $stationLevel
+## [1] 1
+## 
+## $trendFlag
+## [1] TRUE
+\end{verbatim}
+
+\hypertarget{reformat-data}{%
+\section{Reformat data}\label{reformat-data}}
+
+Dates are reformatted into a datetime variable, and a numerical record
+ordering is added. QA flags are converted to a factor form. Data without
+issue should have empty \texttt{QA\_Flag} fields.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data\_in}\SpecialCharTok{$}\NormalTok{id }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(data\_in)) }\CommentTok{\# does not account for missing rows in the data}
+\NormalTok{data\_in}\SpecialCharTok{$}\NormalTok{Flag }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data\_in}\SpecialCharTok{$}\NormalTok{Flag)}
+
+\CommentTok{\# Make the lfstat object}
+\NormalTok{lf\_flow\_raw }\OtherTok{\textless{}{-}}\NormalTok{ data\_in}
+\FunctionTok{colnames}\NormalTok{(lf\_flow\_raw)[}\DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \StringTok{"Date"}
+\NormalTok{lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{day }\OtherTok{\textless{}{-}} \FunctionTok{day}\NormalTok{(lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{Date)}
+\NormalTok{lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{month }\OtherTok{\textless{}{-}} \FunctionTok{month}\NormalTok{(lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{Date)}
+\NormalTok{lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{year }\OtherTok{\textless{}{-}} \FunctionTok{year}\NormalTok{(lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{Date)}
+\NormalTok{lf\_flow }\OtherTok{\textless{}{-}}\NormalTok{ lf\_flow\_raw[,}\FunctionTok{c}\NormalTok{(}\StringTok{"day"}\NormalTok{, }\StringTok{"month"}\NormalTok{, }\StringTok{"year"}\NormalTok{, }\StringTok{"Flow"}\NormalTok{)]}
+\FunctionTok{colnames}\NormalTok{(lf\_flow) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"day"}\NormalTok{, }\StringTok{"month"}\NormalTok{, }\StringTok{"year"}\NormalTok{, }\StringTok{"flow"}\NormalTok{)}
+\NormalTok{year\_start\_month }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{lf\_flow }\OtherTok{\textless{}{-}} \FunctionTok{createlfobj}\NormalTok{(lf\_flow, }\AttributeTok{hyearstart=}\NormalTok{year\_start\_month)}
+\FunctionTok{flowunit}\NormalTok{(lf\_flow) }\OtherTok{\textless{}{-}} \StringTok{"m\^{}3/sec"}
+\NormalTok{lf\_flow}\SpecialCharTok{$}\NormalTok{date }\OtherTok{\textless{}{-}}\NormalTok{ lf\_flow\_raw}\SpecialCharTok{$}\NormalTok{Date}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{derive-flow-statistics}{%
+\section{Derive flow statistics}\label{derive-flow-statistics}}
+
+\hypertarget{high-flow}{%
+\subsection{High Flow}\label{high-flow}}
+
+\hypertarget{amax}{%
+\subsubsection{AMAX}\label{amax}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{MIN\_DAYS\_PER\_YEAR }\OtherTok{\textless{}{-}} \DecValTok{300} \CommentTok{\# Need to agree on.}
+\CommentTok{\# This value might be different by indicator}
+\NormalTok{amax\_raw }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(lf\_flow) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{count=}\FunctionTok{n}\NormalTok{(), }\AttributeTok{amax=}\FunctionTok{max}\NormalTok{(flow, }\AttributeTok{na.rm=}\NormalTok{T),}
+            \AttributeTok{doy=}\FunctionTok{which.max}\NormalTok{(flow), }\AttributeTok{date=}\NormalTok{date[doy]) }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(count }\SpecialCharTok{\textgreater{}}\NormalTok{ MIN\_DAYS\_PER\_YEAR)}
+
+\NormalTok{amax\_out }\OtherTok{\textless{}{-}}\NormalTok{ amax\_raw[,}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{4}\NormalTok{)]}
+\FunctionTok{colnames}\NormalTok{(amax\_out) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"YEAR"}\NormalTok{, }\StringTok{"AMAX"}\NormalTok{, }\StringTok{"DATE"}\NormalTok{, }\StringTok{"DOY"}\NormalTok{)}
+
+\FunctionTok{write\_csv}\NormalTok{(amax\_raw, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/AM\_raw\_"}\NormalTok{, Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/amaxplot-1.pdf}
+
+\hypertarget{peaks-over-threshold}{%
+\subsubsection{Peaks-over-Threshold}\label{peaks-over-threshold}}
+
+Here a monthly threshold is determined by taking the POT3 threshold (an
+average of 3 POT events per year) which equated to an annual probability
+of exceedence of 0.81\%.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{vmt\_pot }\OtherTok{\textless{}{-}}\NormalTok{ lfstat}\SpecialCharTok{::}\FunctionTok{vary\_threshold}\NormalTok{(lf\_flow,}
+                      \AttributeTok{varying=}\StringTok{"monthly"}\NormalTok{,}
+                      \AttributeTok{fun=}\ControlFlowTok{function}\NormalTok{(x)\{}\FunctionTok{quantile}\NormalTok{(x, }\AttributeTok{probs=}\FunctionTok{c}\NormalTok{(}\FloatTok{0.992}\NormalTok{), }\AttributeTok{na.rm=}\NormalTok{T)\})}
+
+\NormalTok{lf\_flow}\SpecialCharTok{$}\NormalTok{threshold }\OtherTok{\textless{}{-}} \FunctionTok{as.vector}\NormalTok{(vmt\_pot)}
+
+\NormalTok{vmt\_summary }\OtherTok{\textless{}{-}}\NormalTok{ lf\_flow }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{group\_by}\NormalTok{(month) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{threshold=}\FunctionTok{mean}\NormalTok{(threshold))}
+
+\NormalTok{lf\_flowPOT }\OtherTok{\textless{}{-}}\NormalTok{ lf\_flow}
+\NormalTok{lf\_flowPOT}\SpecialCharTok{$}\NormalTok{flow[}\FunctionTok{is.na}\NormalTok{(lf\_flowPOT}\SpecialCharTok{$}\NormalTok{flow)] }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\DecValTok{9999}
+\NormalTok{peaks }\OtherTok{\textless{}{-}}\NormalTok{ ilaprosUtils}\SpecialCharTok{::}\FunctionTok{extractPeaks}\NormalTok{(}\AttributeTok{vecObs=}\NormalTok{lf\_flowPOT}\SpecialCharTok{$}\NormalTok{flow, }\AttributeTok{mintimeDiff=}\DecValTok{7}\NormalTok{)}
+\NormalTok{pot\_raw }\OtherTok{\textless{}{-}}\NormalTok{ lf\_flow[((lf\_flow}\SpecialCharTok{$}\NormalTok{flow }\SpecialCharTok{\textgreater{}}\NormalTok{ lf\_flow}\SpecialCharTok{$}\NormalTok{threshold) }\SpecialCharTok{\&}\NormalTok{ (peaks}\SpecialCharTok{==}\DecValTok{1}\NormalTok{)), ]}
+\FunctionTok{write\_csv}\NormalTok{(pot\_raw, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/POT\_raw\_"}\NormalTok{, Station , }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/potplot-1.pdf}
+
+\hypertarget{low-flow}{%
+\subsection{Low flow}\label{low-flow}}
+
+\hypertarget{percentiles-of-flow}{%
+\subsubsection{Percentiles of flow}\label{percentiles-of-flow}}
+
+We calculate the annual and seasonal maximum and minimum, and the 5th,
+70th, 90th, and 95th percentiles of flow. Seasons are actually just
+yearly quarters (JFM, AMJ, JAS, OND) to allow for seasonal comparability
+across the network.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lf\_seas\_fun }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(lf\_flow, }\AttributeTok{qxx=}\FloatTok{0.9}\NormalTok{)\{}
+  \FunctionTok{apply.seasonal}\NormalTok{(lf\_xts, }\AttributeTok{fun=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{quantile}\NormalTok{(x,qxx,}\AttributeTok{na.rm=}\NormalTok{T)\},}
+                 \AttributeTok{varying=}\FunctionTok{c}\NormalTok{(}\StringTok{"Qu1"}\OtherTok{=}\StringTok{"1999{-}01{-}01"}\NormalTok{,}\StringTok{"Qu2"}\OtherTok{=}\StringTok{"1999{-}04{-}01"}\NormalTok{,}
+                           \StringTok{"Qu3"}\OtherTok{=}\StringTok{"1999{-}07{-}01"}\NormalTok{,}\StringTok{"Qu4"}\OtherTok{=}\StringTok{"1999{-}10{-}01"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{year=}\FunctionTok{rownames}\NormalTok{(.), }\AttributeTok{Qxx=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{qxx) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols=}\DecValTok{1}\SpecialCharTok{:}\DecValTok{4}\NormalTok{, }\AttributeTok{names\_to=}\StringTok{"Season"}\NormalTok{, }\AttributeTok{values\_to=}\StringTok{"Flow"}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{lf\_year\_fun }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(lf\_flow, }\AttributeTok{qxx=}\FloatTok{0.9}\NormalTok{)\{}
+    \FunctionTok{apply.yearly}\NormalTok{(lf\_xts, }\AttributeTok{FUN=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{quantile}\NormalTok{(x,qxx,}\AttributeTok{na.rm=}\NormalTok{T)\}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{year=}\NormalTok{lubridate}\SpecialCharTok{::}\FunctionTok{year}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(.)), }\AttributeTok{Qxx=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{qxx)}
+\NormalTok{\}}
+
+\NormalTok{lf\_month\_fun }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(lf\_flow, }\AttributeTok{qxx=}\FloatTok{0.9}\NormalTok{)\{}
+    \FunctionTok{apply.monthly}\NormalTok{(lf\_xts, }\AttributeTok{FUN=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{quantile}\NormalTok{(x,qxx,}\AttributeTok{na.rm=}\NormalTok{T)\}) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{year=}\NormalTok{lubridate}\SpecialCharTok{::}\FunctionTok{year}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(.)),}
+           \AttributeTok{month=}\NormalTok{lubridate}\SpecialCharTok{::}\FunctionTok{month}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(.)),}
+           \AttributeTok{Qxx=}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{qxx)}
+\NormalTok{\}}
+
+\NormalTok{lf\_xts }\OtherTok{\textless{}{-}} \FunctionTok{as.xts}\NormalTok{(lf\_flow)}
+
+\NormalTok{percentiles }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\AttributeTok{max=}\DecValTok{1}\NormalTok{, }\AttributeTok{Q95=}\FloatTok{0.05}\NormalTok{, }\AttributeTok{Q90=}\FloatTok{0.10}\NormalTok{, }\AttributeTok{Med=}\FloatTok{0.5}\NormalTok{, }\AttributeTok{Q70=}\FloatTok{0.30}\NormalTok{, }\AttributeTok{Q05=}\FloatTok{0.95}\NormalTok{, }\AttributeTok{min=}\DecValTok{0}\NormalTok{)}
+\NormalTok{lf\_year }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(percentiles, \textbackslash{}(x)\{}\FunctionTok{lf\_year\_fun}\NormalTok{(lf\_xts, x)\})}
+\NormalTok{lf\_year\_long }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{do.call}\NormalTok{(rbind,lf\_year))}
+\NormalTok{lf\_year }\OtherTok{\textless{}{-}}\NormalTok{ lf\_year\_long }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{id\_cols=}\FunctionTok{c}\NormalTok{(year), }\AttributeTok{names\_from=}\NormalTok{Qxx, }\AttributeTok{names\_prefix=}\StringTok{"Q"}\NormalTok{,}
+              \AttributeTok{values\_from=}\StringTok{"discharge"}\NormalTok{)}
+\FunctionTok{colnames}\NormalTok{(lf\_year) }\OtherTok{\textless{}{-}} 
+  \FunctionTok{c}\NormalTok{(}\StringTok{"Year"}\NormalTok{, }\StringTok{"MAX"}\NormalTok{, }\StringTok{"Q95"}\NormalTok{, }\StringTok{"Q90"}\NormalTok{, }\StringTok{"Q70"}\NormalTok{, }\StringTok{"Median"}\NormalTok{, }\StringTok{"Q05"}\NormalTok{, }\StringTok{"MIN"}\NormalTok{)}
+\FunctionTok{write\_csv}\NormalTok{(lf\_year, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/yearlyPercentiles\_"}\NormalTok{, }
+\NormalTok{                          Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\NormalTok{lf\_year\_long}\SpecialCharTok{$}\NormalTok{Qxx }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(lf\_year\_long}\SpecialCharTok{$}\NormalTok{Qxx, }\AttributeTok{levels=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.5}\NormalTok{,}\FloatTok{0.7}\NormalTok{,}\FloatTok{0.9}\NormalTok{,}\FloatTok{0.95}\NormalTok{,}\DecValTok{1}\NormalTok{),}
+                           \AttributeTok{labels=}\FunctionTok{c}\NormalTok{(}\StringTok{"MAX"}\NormalTok{,}\StringTok{"Q05"}\NormalTok{, }\StringTok{"Med"}\NormalTok{, }\StringTok{"Q70"}\NormalTok{, }\StringTok{"Q90"}\NormalTok{, }\StringTok{"Q95"}\NormalTok{, }\StringTok{"MIN"}\NormalTok{))}
+
+\NormalTok{lf\_seasonal }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(percentiles, \textbackslash{}(x)\{}\FunctionTok{lf\_seas\_fun}\NormalTok{(lf\_xts, x)\})}
+\NormalTok{lf\_seasonal\_long }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{do.call}\NormalTok{(rbind,lf\_seasonal))}
+\NormalTok{lf\_seasonal }\OtherTok{\textless{}{-}}\NormalTok{ lf\_seasonal\_long }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{id\_cols=}\FunctionTok{c}\NormalTok{(year, Season), }\AttributeTok{names\_from=}\NormalTok{Qxx, }\AttributeTok{names\_prefix=}\StringTok{"Q"}\NormalTok{,}
+              \AttributeTok{values\_from=}\StringTok{"Flow"}\NormalTok{)}
+\FunctionTok{colnames}\NormalTok{(lf\_seasonal) }\OtherTok{\textless{}{-}} 
+  \FunctionTok{c}\NormalTok{(}\StringTok{"Year"}\NormalTok{, }\StringTok{"Season"}\NormalTok{, }\StringTok{"MAX"}\NormalTok{, }\StringTok{"Q95"}\NormalTok{, }\StringTok{"Q90"}\NormalTok{, }\StringTok{"Q70"}\NormalTok{, }\StringTok{"Median"}\NormalTok{, }\StringTok{"Q05"}\NormalTok{, }\StringTok{"MIN"}\NormalTok{)}
+\FunctionTok{write\_csv}\NormalTok{(lf\_seasonal, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/seasonalPercentiles\_"}\NormalTok{, }
+\NormalTok{                          Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+
+\NormalTok{lf\_monthly }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(percentiles, \textbackslash{}(x)\{}\FunctionTok{lf\_month\_fun}\NormalTok{(lf\_xts, x)\})}
+\NormalTok{lf\_monthly\_long }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{do.call}\NormalTok{(rbind,lf\_monthly))}
+\NormalTok{lf\_monthly }\OtherTok{\textless{}{-}}\NormalTok{ lf\_monthly\_long }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{id\_cols=}\FunctionTok{c}\NormalTok{(year, month), }\AttributeTok{names\_from=}\NormalTok{Qxx, }\AttributeTok{names\_prefix=}\StringTok{"Q"}\NormalTok{,}
+              \AttributeTok{values\_from=}\StringTok{"discharge"}\NormalTok{)}
+\FunctionTok{colnames}\NormalTok{(lf\_monthly) }\OtherTok{\textless{}{-}} 
+  \FunctionTok{c}\NormalTok{(}\StringTok{"Year"}\NormalTok{, }\StringTok{"Month"}\NormalTok{, }\StringTok{"MAX"}\NormalTok{, }\StringTok{"Q95"}\NormalTok{, }\StringTok{"Q90"}\NormalTok{, }\StringTok{"Q70"}\NormalTok{, }\StringTok{"Median"}\NormalTok{, }\StringTok{"Q05"}\NormalTok{, }\StringTok{"MIN"}\NormalTok{)}
+\FunctionTok{write\_csv}\NormalTok{(lf\_monthly, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/monthlyPercentiles\_"}\NormalTok{, }
+\NormalTok{                          Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/monthlymean-1.pdf}
+
+\hypertarget{drought-events}{%
+\subsubsection{Drought events}\label{drought-events}}
+
+Using the \texttt{lfstat} package, we calculate the monthly varying 20\%
+threshold, and use that to find periods of drought where this threshold
+is not exceeded for a length of time.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{vmt\_drought }\OtherTok{\textless{}{-}} \FunctionTok{vary\_threshold}\NormalTok{(lf\_flow,}
+                      \AttributeTok{varying=}\StringTok{"monthly"}\NormalTok{,}
+                      \AttributeTok{fun=}\ControlFlowTok{function}\NormalTok{(x)\{}\FunctionTok{quantile}\NormalTok{(x, }\AttributeTok{probs=}\FunctionTok{c}\NormalTok{(}\FloatTok{0.2}\NormalTok{))\})}
+\NormalTok{droughts }\OtherTok{\textless{}{-}} \FunctionTok{find\_droughts}\NormalTok{(lf\_flow, vmt\_drought, }\AttributeTok{varying=}\StringTok{"monthly"}\NormalTok{)}
+\FunctionTok{write\_csv}\NormalTok{(}
+  \FunctionTok{summary}\NormalTok{(droughts), }\AttributeTok{file=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/droughts\_"}\NormalTok{, Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{n-day-minima}{%
+\subsubsection{N-day minima}\label{n-day-minima}}
+
+We also calculate the mean annual flow minima based on 7 and 30 day
+accumulations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mean\_annual\_min\_7 }\OtherTok{\textless{}{-}} \FunctionTok{MAM}\NormalTok{(lf\_flow, }\DecValTok{7}\NormalTok{, }\AttributeTok{yearly=}\ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{mean\_annual\_min\_30 }\OtherTok{\textless{}{-}} \FunctionTok{MAM}\NormalTok{(lf\_flow, }\DecValTok{30}\NormalTok{, }\AttributeTok{yearly=}\ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{mean\_flow }\OtherTok{\textless{}{-}} \FunctionTok{meanflow}\NormalTok{(lf\_flow, }\AttributeTok{yearly=}\ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{mean\_lowflow }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Year=}\FunctionTok{min}\NormalTok{(lf\_flow}\SpecialCharTok{$}\NormalTok{year)}\SpecialCharTok{:}\FunctionTok{max}\NormalTok{(lf\_flow}\SpecialCharTok{$}\NormalTok{year),}
+                           \AttributeTok{MAM7=}\NormalTok{mean\_annual\_min\_7}\SpecialCharTok{$}\NormalTok{MAn,}
+                           \AttributeTok{MAM30=}\NormalTok{mean\_annual\_min\_30}\SpecialCharTok{$}\NormalTok{MAn,}
+                           \AttributeTok{MAF=}\NormalTok{mean\_flow}\SpecialCharTok{$}\NormalTok{flow)}
+
+\FunctionTok{write\_csv}\NormalTok{(mean\_lowflow, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/mean\_lowflow\_"}\NormalTok{, Station, }\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{trend-analysis-and-plots}{%
+\section{Trend analysis and plots}\label{trend-analysis-and-plots}}
+
+We test the yearly quantile data for significant breakpoints (examining
+daily data gives very high likelihood of breakpoints being detected due
+to very narrow confidence bands conferred by large datasets.)
+
+\hypertarget{check-for-breakpoints}{%
+\subsection{Check for breakpoints}\label{check-for-breakpoints}}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule()
+& Pettitt.bp.1 & Pettitt.p & Chow.test.F & Chow.test.p & CPT.max.bp \\
+\midrule()
+\endhead
+MAX & 1988 & 0.6984209 & 0.4832118 & 0.6198294 & 1 \\
+Q95 & 1997 & 0.0212907 & 0.0204811 & 0.9797359 & 1 \\
+Q90 & 1997 & 0.0169167 & 0.0553620 & 0.9462042 & 1 \\
+Q70 & 1987 & 0.6243279 & 0.0105043 & 0.9895530 & 1 \\
+Median & 1997 & 0.3391481 & 0.3322652 & 0.7189682 & 1 \\
+Q05 & 1992 & 0.1092478 & 0.4322425 & 0.6516058 & 1 \\
+MIN & 1996 & 0.0305652 & 1.0635907 & 0.3533753 & 1 \\
+amax & 1970 & 1.0000000 & 0.8946598 & 0.4158916 & NA \\
+MAn\_30 & 1997 & 0.0111583 & 0.0811588 & 0.9221762 & 1 \\
+MAn\_7 & 1996 & 0.0169167 & 0.4911516 & 0.6150268 & 1 \\
+\bottomrule()
+\end{longtable}
+
+\hypertarget{check-for-autocorrelation}{%
+\subsection{Check for autocorrelation}\label{check-for-autocorrelation}}
+
+We plot the autocorrelation of the different percentiles of flow, AMAX
+and POT data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{daily\_autocor }\OtherTok{\textless{}{-}} \FunctionTok{acf}\NormalTok{(lf\_flow}\SpecialCharTok{$}\NormalTok{flow, }\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\NormalTok{amax\_autocor }\OtherTok{\textless{}{-}} \FunctionTok{acf}\NormalTok{(amax\_raw}\SpecialCharTok{$}\NormalTok{amax, }\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\NormalTok{pot\_autocor }\OtherTok{\textless{}{-}} \FunctionTok{acf}\NormalTok{(pot\_raw}\SpecialCharTok{$}\NormalTok{flow, }\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\NormalTok{low\_ac\_monthly }\OtherTok{\textless{}{-}}\NormalTok{ lf\_monthly\_long }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(Qxx}\SpecialCharTok{==}\FloatTok{0.95} \SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(discharge)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(discharge) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{acf}\NormalTok{(}\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\NormalTok{low\_ac\_q1 }\OtherTok{\textless{}{-}}\NormalTok{ lf\_seasonal\_long }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(Qxx}\SpecialCharTok{==}\FloatTok{0.95} \SpecialCharTok{\&}\NormalTok{ Season}\SpecialCharTok{==}\StringTok{"Qu1"} \SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Flow)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Flow) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{acf}\NormalTok{(}\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\NormalTok{low\_ac\_Jan }\OtherTok{\textless{}{-}}\NormalTok{  lf\_monthly\_long }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(Qxx}\SpecialCharTok{==}\FloatTok{0.95} \SpecialCharTok{\&}\NormalTok{ month}\SpecialCharTok{==}\DecValTok{1} \SpecialCharTok{\&} \SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(discharge)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(discharge) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{acf}\NormalTok{(}\AttributeTok{ci.type=}\StringTok{"ma"}\NormalTok{, }\AttributeTok{plot=}\NormalTok{F)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/autocorplots-1.pdf}
+
+\hypertarget{mann-kendall-tests}{%
+\subsection{Mann-Kendall Tests}\label{mann-kendall-tests}}
+
+We perform Mann-Kendall tests, using significance derived from
+block-bootstrapping
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mk\_yearly }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(lf\_data[,}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{], MKZ\_blockboot)}
+
+\NormalTok{mk\_yearly }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{do.call}\NormalTok{(rbind, mk\_yearly))}
+
+\NormalTok{mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkZ }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+\NormalTok{mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkP }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+\NormalTok{mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkTSE }\OtherTok{\textless{}{-}} \ConstantTok{NA}
+
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{ncol}\NormalTok{(lf\_data[,}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{]))\{}
+\NormalTok{  z }\OtherTok{\textless{}{-}} \FunctionTok{pwmk}\NormalTok{(lf\_data[,i])}
+\NormalTok{  mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkZ[i] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\DecValTok{1}\NormalTok{]}
+\NormalTok{  mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkP[i] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\DecValTok{4}\NormalTok{]}
+\NormalTok{  mk\_yearly}\SpecialCharTok{$}\NormalTok{pwmkTSE[i] }\OtherTok{\textless{}{-}}\NormalTok{ z[}\DecValTok{2}\NormalTok{]}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.0614}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.0965}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1053}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1140}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1404}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1404}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.2018}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 14\tabcolsep) * \real{0.1404}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MKZ
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MKZ 2.5\%ile
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MKZ 97.5\%ile
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+MKZ significant
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+prewhitened MKZ
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+prewhitened MKZ pvalue
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+prewhitened TSE
+\end{minipage} \\
+\midrule()
+\endhead
+MAX & 1.177837 & -1.951177 & 1.870372 & FALSE & 10.239 & 0.000 &
+0.059 \\
+Q95 & 1.982648 & -2.423779 & 2.423886 & FALSE & 1.104 & 0.270 & 0.038 \\
+Q90 & 2.559538 & -2.28483 & 2.360951 & TRUE & 1.071 & 0.284 & 0.000 \\
+Q70 & -0.3817817 & -2.381615 & 2.260013 & FALSE & 1.640 & 0.101 &
+0.000 \\
+Median & 0.9586317 & -2.350707 & 2.228526 & FALSE & -0.636 & 0.525 &
+-0.001 \\
+Q05 & 1.998064 & -1.845427 & 1.845467 & TRUE & 0.301 & 0.763 & 0.000 \\
+MIN & 1.593145 & -2.418073 & 2.438346 & FALSE & 1.506 & 0.132 & 0.011 \\
+amax & 0.7241469 & -1.992184 & 1.905833 & FALSE & 1.046 & 0.296 &
+0.000 \\
+MAn\_30 & 2.745307 & -2.413863 & 2.536362 & TRUE & 0.880 & 0.379 &
+0.032 \\
+MAn\_7 & 1.908909 & -2.464365 & 2.45523 & FALSE & 1.355 & 0.175 &
+0.000 \\
+\bottomrule()
+\end{longtable}
+
+\hypertarget{theil-sen-slope}{%
+\subsection{Theil-Sen slope}\label{theil-sen-slope}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Trends in high/mid/low percentiles}
+
+\NormalTok{lf\_data }\OtherTok{\textless{}{-}}\NormalTok{ plyr}\SpecialCharTok{::}\FunctionTok{join\_all}\NormalTok{(}\AttributeTok{dfs=}\FunctionTok{list}\NormalTok{(lf\_year\_temp, amax\_raw[,}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{)], mean\_annual\_min\_30, mean\_annual\_min\_7), }\AttributeTok{type=}\StringTok{\textquotesingle{}full\textquotesingle{}}\NormalTok{, }\AttributeTok{by=}\StringTok{"year"}\NormalTok{)}
+
+\NormalTok{MKp }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{apply}\NormalTok{(lf\_data[,}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{], }\DecValTok{2}\NormalTok{ , \textbackslash{}(x)}\FunctionTok{unlist}\NormalTok{(}\FunctionTok{MannKendall}\NormalTok{(x))[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]))}
+\NormalTok{TSEp }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(}\FunctionTok{colnames}\NormalTok{(lf\_data)[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{],\textbackslash{}(x)\{}
+  \FunctionTok{zyp.sen}\NormalTok{(}\FunctionTok{as.formula}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(x,}\StringTok{"\textasciitilde{}year"}\NormalTok{)), }\AttributeTok{data=}\NormalTok{lf\_data)}\SpecialCharTok{$}\NormalTok{coefficients\}))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}llrrrr@{}}
+\toprule()
+& quantile & MKZ & MK\_pvalue & TSE & TSE\_intercept \\
+\midrule()
+\endhead
+MAX & MAX & 0.1146448 & 0.2388616 & 0.0500000 & -90.6000000 \\
+Q95 & Q95 & 0.1930676 & 0.0474068 & 0.0003056 & -0.5516111 \\
+Q90 & Q90 & 0.2489192 & 0.0104811 & 0.0003913 & -0.7157826 \\
+Q70 & Q70 & -0.0376914 & 0.7026232 & -0.0003437 & 0.9081562 \\
+Median & Median & 0.0935537 & 0.3377442 & 0.0002936 & -0.4750894 \\
+Q05 & Q05 & 0.1937255 & 0.0457097 & 0.0136333 & -24.8335333 \\
+MIN & MIN & 0.1557361 & 0.1111277 & 0.0002308 & -0.4195385 \\
+amax & amax & 0.0723713 & 0.4689755 & 0.0288902 & NA \\
+MAn\_30 & MAn\_30 & 0.2658823 & 0.0060455 & 0.0004007 & -0.7349847 \\
+MAn\_7 & MAn\_7 & 0.1853162 & 0.0562739 & 0.0003077 & -0.5629341 \\
+\bottomrule()
+\end{longtable}
+
+\hypertarget{temporal-clustering}{%
+\subsection{Temporal clustering}\label{temporal-clustering}}
+
+\hypertarget{droughts}{%
+\subsubsection{Droughts}\label{droughts}}
+
+Here we examine whether there are any significant clusters or prolonged
+absences of drought events, only looking at start dates.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{summdrought }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(droughts)}
+\NormalTok{drght\_per\_yr }\OtherTok{\textless{}{-}} \FunctionTok{findHydrolYr}\NormalTok{(}\FunctionTok{ymd}\NormalTok{(summdrought}\SpecialCharTok{$}\NormalTok{time), }\AttributeTok{starttime=}\StringTok{"2000{-}10{-}01"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(yr) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{Nlow=}\FunctionTok{n}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: All formats failed to parse. No formats found.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{MannKendall}\NormalTok{(drght\_per\_yr}\SpecialCharTok{$}\NormalTok{Nlow)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tau = -0.0573, 2-sided pvalue =0.5988
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var}\NormalTok{(drght\_per\_yr}\SpecialCharTok{$}\NormalTok{Nlow)}\SpecialCharTok{/}\FunctionTok{mean}\NormalTok{(drght\_per\_yr}\SpecialCharTok{$}\NormalTok{Nlow)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.856085
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lf\_year }\OtherTok{\textless{}{-}} \FunctionTok{left\_join}\NormalTok{(lf\_year, drght\_per\_yr, }\AttributeTok{by=}\FunctionTok{c}\NormalTok{(}\StringTok{"Year"}\OtherTok{=}\StringTok{"yr"}\NormalTok{))}
+
+\NormalTok{DC }\OtherTok{\textless{}{-}} \FunctionTok{denclust}\NormalTok{(summdrought}\SpecialCharTok{$}\NormalTok{time, }\AttributeTok{bwi=}\DecValTok{365}\SpecialCharTok{*}\DecValTok{4}\NormalTok{,}
+    \AttributeTok{plotfilename=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"./droughtclustering\_"}\NormalTok{, Station,}\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".png"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "2 significant clusters and 1 significant absences."
+\end{verbatim}
+
+\includegraphics{workflow_files/figure-latex/droughtclust-1.pdf} Here we
+see that the dispersion of droughts is 1.8560847. If this is a lot less
+than 1, then it shows signs of under dispersion compared to a Poisson
+process (independent arrivals).
+
+\hypertarget{pot-events}{%
+\subsubsection{POT events}\label{pot-events}}
+
+clustering: over/underdispersion
+
+Here we examine whether there are any significant clusters or prolonged
+absences of POT events.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pot\_per\_year }\OtherTok{\textless{}{-}}\NormalTok{ pot\_raw }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ dplyr}\SpecialCharTok{::}\FunctionTok{summarise}\NormalTok{(}\AttributeTok{Npots=}\FunctionTok{n}\NormalTok{())}
+\FunctionTok{MannKendall}\NormalTok{(pot\_per\_year}\SpecialCharTok{$}\NormalTok{Npots)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## tau = -0.00168, 2-sided pvalue =1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var}\NormalTok{(pot\_per\_year}\SpecialCharTok{$}\NormalTok{Npots)}\SpecialCharTok{/}\FunctionTok{mean}\NormalTok{(pot\_per\_year}\SpecialCharTok{$}\NormalTok{Npots)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.359763
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lf\_year }\OtherTok{\textless{}{-}} \FunctionTok{left\_join}\NormalTok{(lf\_year, pot\_per\_year, }\AttributeTok{by=}\FunctionTok{c}\NormalTok{(}\StringTok{"Year"}\OtherTok{=}\StringTok{"year"}\NormalTok{))}
+
+\NormalTok{DC\_pot }\OtherTok{\textless{}{-}} \FunctionTok{denclust}\NormalTok{(pot\_raw}\SpecialCharTok{$}\NormalTok{date, }\AttributeTok{bwi=}\DecValTok{365}\SpecialCharTok{*}\DecValTok{2}\NormalTok{, }\AttributeTok{daysNotSeconds=}\ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{plotfilename=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"./droughtclustering\_"}\NormalTok{, Station,}\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".png"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1 significant clusters and 2 significant absences."
+\end{verbatim}
+
+\includegraphics{workflow_files/figure-latex/potclust-1.pdf}
+
+Here we see that the dispersion of droughts is 1.3597627. If this is a
+lot less than 1, then it shows signs of under dispersion compared to a
+Poisson process (independent arrivals).
+
+\hypertarget{trends-in-timing}{%
+\subsection{Trends in timing}\label{trends-in-timing}}
+
+\hypertarget{day-minimadroughts}{%
+\subsubsection{7-day minima/droughts}\label{day-minimadroughts}}
+
+In this section we briefly look at whether there are trends in when in
+the year droughts and 7-day minima are happening.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{drt\_yday }\OtherTok{\textless{}{-}}\NormalTok{ ((}\FunctionTok{yday}\NormalTok{(summdrought}\SpecialCharTok{$}\NormalTok{time)}\SpecialCharTok{+}\DecValTok{180}\NormalTok{) }\SpecialCharTok{\%\%} \DecValTok{365}\NormalTok{) }\SpecialCharTok{{-}} \DecValTok{180}
+\NormalTok{drght\_circular }\OtherTok{\textless{}{-}} \FunctionTok{circular}\NormalTok{(}\FunctionTok{yday}\NormalTok{(summdrought}\SpecialCharTok{$}\NormalTok{time)}\SpecialCharTok{*}\DecValTok{2}\SpecialCharTok{*}\NormalTok{pi}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\NormalTok{rm\_circ }\OtherTok{\textless{}{-}} \FunctionTok{rollapply}\NormalTok{(drght\_circular, }
+                     \AttributeTok{FUN=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{suppressWarnings}\NormalTok{(}\FunctionTok{mean.circular}\NormalTok{(x))\}, }\AttributeTok{width=}\DecValTok{50}\NormalTok{)}
+\NormalTok{rm\_circ2 }\OtherTok{\textless{}{-}} \FunctionTok{rollmean}\NormalTok{(}\FunctionTok{yday}\NormalTok{(summdrought}\SpecialCharTok{$}\NormalTok{time), }\DecValTok{50}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/droughtcircplots-1.pdf}
+\includegraphics{workflow_files/figure-latex/droughtcircplots-2.pdf}
+
+\begin{verbatim}
+## NULL
+\end{verbatim}
+
+\includegraphics{workflow_files/figure-latex/droughtcircplots-3.pdf}
+\includegraphics{workflow_files/figure-latex/droughtcircplots-4.pdf}
+
+\hypertarget{amaxpot}{%
+\subsubsection{AMAX/POT}\label{amaxpot}}
+
+In this section we briefly look at whether there are trends in when in
+the year AMAX events and other POT events are happening.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fhy\_pot }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{yday}\NormalTok{(pot\_raw}\SpecialCharTok{$}\NormalTok{date)}\SpecialCharTok{+}\DecValTok{180}\NormalTok{)}\SpecialCharTok{\%\%}\DecValTok{365} \SpecialCharTok{{-}} \DecValTok{180}
+\NormalTok{pot\_circular }\OtherTok{\textless{}{-}} \FunctionTok{circular}\NormalTok{(fhy\_pot}\SpecialCharTok{*}\DecValTok{2}\SpecialCharTok{*}\NormalTok{pi}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\NormalTok{rm\_pot }\OtherTok{\textless{}{-}} \FunctionTok{rollapply}\NormalTok{(pot\_circular, }
+                    \AttributeTok{FUN=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{suppressWarnings}\NormalTok{(}\FunctionTok{mean.circular}\NormalTok{(x))\}, }\AttributeTok{width=}\DecValTok{50}\NormalTok{)}
+\NormalTok{rm\_pot2 }\OtherTok{\textless{}{-}} \FunctionTok{rollmean}\NormalTok{(fhy\_pot, }\DecValTok{50}\NormalTok{)}
+
+\NormalTok{fhy\_am }\OtherTok{\textless{}{-}}\NormalTok{ (}\FunctionTok{yday}\NormalTok{(amax\_raw}\SpecialCharTok{$}\NormalTok{date)}\SpecialCharTok{+}\DecValTok{180}\NormalTok{)}\SpecialCharTok{\%\%}\DecValTok{365} \SpecialCharTok{{-}} \DecValTok{180}
+\NormalTok{am\_circular }\OtherTok{\textless{}{-}} \FunctionTok{circular}\NormalTok{(fhy\_am}\SpecialCharTok{*}\DecValTok{2}\SpecialCharTok{*}\NormalTok{pi}\SpecialCharTok{/}\DecValTok{365}\NormalTok{)}
+\NormalTok{rm\_am }\OtherTok{\textless{}{-}} \FunctionTok{rollapply}\NormalTok{(am\_circular, }
+                    \AttributeTok{FUN=}\NormalTok{\textbackslash{}(x)\{}\FunctionTok{suppressWarnings}\NormalTok{(}\FunctionTok{mean.circular}\NormalTok{(x))\}, }\AttributeTok{width=}\DecValTok{10}\NormalTok{)}
+\NormalTok{rm\_am2 }\OtherTok{\textless{}{-}} \FunctionTok{rollmean}\NormalTok{(fhy\_am, }\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{workflow_files/figure-latex/potcircplots-1.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-2.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-3.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-4.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-5.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-6.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-7.pdf}
+\includegraphics{workflow_files/figure-latex/potcircplots-8.pdf}
+
+\hypertarget{yearly-output}{%
+\subsection{Yearly output}\label{yearly-output}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{write\_csv}\NormalTok{(lf\_year, }\AttributeTok{file=}\FunctionTok{paste0}\NormalTok{(}\StringTok{"./Data/yearlystats\_"}\NormalTok{, Station,}\StringTok{"\_"}\NormalTok{, Agency, }\StringTok{".csv"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

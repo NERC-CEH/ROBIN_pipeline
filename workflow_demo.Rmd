@@ -1,0 +1,60 @@
+---
+title: "Data Processing Example"
+author: "ROBIN Network"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("./main_functions.R")
+```
+
+# Aim for pipeline
+Insert text explaining the main steps of the ROBIN pipeline.
+
+ > Data format (columns: Agency, Station, Day, Flow, Flag)
+ > Check for Level-1/Level-2 status based on completeness.
+ > Summary statistics
+  + Monthly thresholds
+  + POT series
+  + 30-day/10-day/7-day rolling totals
+  + Annual/monthly/quarterly quantiles/mean
+  + Annual 1-day/10-day/30-day maxima
+  + Annual 7-day/30-day minima
+ > Tests
+  + Pettitt breakpoint test
+  + Seasonal Mann-Kendall
+  + Rolling Mann-Kendall-Snyers
+ > Indicators
+  + SSI
+  + Intermittence
+  + Mean Annual Flow (Standardised)
+  + Aridity Index
+  
+
+# Initial setup
+```{r read_in}
+dailyflow_path <- "./41022_gdf.csv"
+dailyflow_raw <- read.csv(dailyflow_path, skip=20, col.names=c("DAY","FLOW","FLAG"), fill=T, header=F)
+dailyflow_raw$DAY <- lubridate::ymd(dailyflow_raw$DAY)
+#dailyflow_raw <- read_in_robin(dailyflow_path)  # or
+#dailyflow_raw <- read_in_robin_db(agency, station)
+```
+
+```{r check_for_level}
+datum <- dailyflow_raw
+datum <-dailyflow_raw %>% 
+  dplyr::mutate(year = lubridate::year(DAY)) %>%
+  group_by(year) %>%
+  dplyr::summarise(count=n()) %>% 
+  dplyr::mutate(
+    enough = count > ifelse(year%%4 == 0 & year%%400 !=0, 366, 365)*0.95)
+
+
+
+# Check for
+any(rle(X)$lengths[rle(X)$values=="m"] > 365*2)
+
+```
+
